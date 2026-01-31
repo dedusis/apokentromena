@@ -158,270 +158,270 @@ class ChordNode:
 
 
 # ------------------- Dataset / Network utils -------------------
+if __name__ == "__main__" :
+    ROOT = Path("data/data_movies_clean.xlsx")
+    DATA_DIR = ROOT / "data"
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    CSV_FILE = DATA_DIR / "data_movies_clean.xlsx"
 
-ROOT = Path(r"C:/Users/user/Desktop/CEID THINGS/Αποκεντρωμένα")
-DATA_DIR = ROOT / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-CSV_FILE = DATA_DIR / "data_movies_clean.csv"
-
-MOVIE_COLS_14 = [
-    "id", "title", "adult", "original_language", "origin_country", "release_date",
-    "genre_names", "production_company_names", "budget", "revenue", "runtime",
-    "popularity", "vote_average", "vote_count"
-]
-
-
-def stabilize_network(nodes: List[ChordNode], rounds: int = 40) -> None:
-    for _ in range(rounds):
-        for n in nodes:
-            n.stabilize()
-        for n in nodes:
-            n.fix_fingers()
+    MOVIE_COLS_14 = [
+        "id", "title", "adult", "original_language", "origin_country", "release_date",
+        "genre_names", "production_company_names", "budget", "revenue", "runtime",
+        "popularity", "vote_average", "vote_count"
+    ]
 
 
-def create_network(num_nodes: int, m: int) -> List[ChordNode]:
-    nodes: List[ChordNode] = []
-    n0 = ChordNode("node-0", m)
-    n0.join(None)
-    nodes.append(n0)
-
-    for i in range(1, num_nodes):
-        ni = ChordNode(f"node-{i}", m)
-        bootstrap = random.choice(nodes)
-        ni.join(bootstrap)
-        nodes.append(ni)
-
-    stabilize_network(nodes, rounds=50)
-    return nodes
+    def stabilize_network(nodes: List[ChordNode], rounds: int = 40) -> None:
+        for _ in range(rounds):
+            for n in nodes:
+                n.stabilize()
+            for n in nodes:
+                n.fix_fingers()
 
 
-def row_to_value(row: pd.Series) -> Dict[str, Any]:
-    return {c: (row[c] if c in row else None) for c in MOVIE_COLS_14}
+    def create_network(num_nodes: int, m: int) -> List[ChordNode]:
+        nodes: List[ChordNode] = []
+        n0 = ChordNode("node-0", m)
+        n0.join(None)
+        nodes.append(n0)
+
+        for i in range(1, num_nodes):
+            ni = ChordNode(f"node-{i}", m)
+            bootstrap = random.choice(nodes)
+            ni.join(bootstrap)
+            nodes.append(ni)
+
+        stabilize_network(nodes, rounds=50)
+        return nodes
 
 
-def stats(hops: List[int]) -> Dict[str, float]:
-    if not hops:
-        return {"avg": 0.0, "min": 0.0, "max": 0.0}
-    return {"avg": sum(hops) / len(hops), "min": float(min(hops)), "max": float(max(hops))}
+    def row_to_value(row: pd.Series) -> Dict[str, Any]:
+        return {c: (row[c] if c in row else None) for c in MOVIE_COLS_14}
 
 
-# ------------------- Operation evaluations -------------------
+    def stats(hops: List[int]) -> Dict[str, float]:
+        if not hops:
+            return {"avg": 0.0, "min": 0.0, "max": 0.0}
+        return {"avg": sum(hops) / len(hops), "min": float(min(hops)), "max": float(max(hops))}
 
-def eval_insert(nodes: List[ChordNode], df: pd.DataFrame, n_ops: int) -> Tuple[Dict[str, float], float, List[str]]:
-    n_ops = min(n_ops, len(df))
-    sample_df = df.sample(n=n_ops, random_state=1).reset_index(drop=True)
 
-    hops_list: List[int] = []
-    titles: List[str] = []
-    t0 = time.time()
+    # ------------------- Operation evaluations -------------------
 
-    for _, row in sample_df.iterrows():
-        key = str(row["title"])
-        value = row_to_value(row)
+    def eval_insert(nodes: List[ChordNode], df: pd.DataFrame, n_ops: int) -> Tuple[Dict[str, float], float, List[str]]:
+        n_ops = min(n_ops, len(df))
+        sample_df = df.sample(n=n_ops, random_state=1).reset_index(drop=True)
 
+        hops_list: List[int] = []
+        titles: List[str] = []
+        t0 = time.time()
+
+        for _, row in sample_df.iterrows():
+            key = str(row["title"])
+            value = row_to_value(row)
+
+            entry = random.choice(nodes)
+            hops = {"hops": 0}
+            entry.put(key, value, hops=hops)
+
+            hops_list.append(hops["hops"])
+            titles.append(key)
+
+        t1 = time.time()
+        return stats(hops_list), (t1 - t0), titles
+
+
+    def eval_lookup(nodes: List[ChordNode], titles: List[str], n_ops: int) -> Tuple[Dict[str, float], float]:
+        if not titles:
+            return {"avg": 0.0, "min": 0.0, "max": 0.0}, 0.0
+
+        hops_list: List[int] = []
+        t0 = time.time()
+
+        for _ in range(n_ops):
+            key = random.choice(titles)
+            entry = random.choice(nodes)
+
+            hops = {"hops": 0}
+            _ = entry.get(key, hops=hops)
+            hops_list.append(hops["hops"])
+
+        t1 = time.time()
+        return stats(hops_list), (t1 - t0)
+
+
+    def eval_delete(nodes: List[ChordNode], titles: List[str], n_ops: int) -> Tuple[Dict[str, float], float]:
+        if not titles:
+            return {"avg": 0.0, "min": 0.0, "max": 0.0}, 0.0
+
+        n_ops = min(n_ops, len(titles))
+        keys_to_delete = random.sample(titles, k=n_ops)
+
+        hops_list: List[int] = []
+        t0 = time.time()
+
+        for key in keys_to_delete:
+            entry = random.choice(nodes)
+            hops = {"hops": 0}
+            _ = entry.delete_key(key, hops=hops)
+            hops_list.append(hops["hops"])
+
+        t1 = time.time()
+        return stats(hops_list), (t1 - t0)
+
+
+    def eval_join(nodes: List[ChordNode], m: int, n_ops: int) -> Tuple[Dict[str, float], float]:
+        hops_list: List[int] = []
+        t0 = time.time()
+
+        for i in range(n_ops):
+            new_node = ChordNode(f"node-new-{int(time.time() * 1000) % 10_000}_{i}", m)
+            bootstrap = random.choice(nodes)
+
+            hops = {"hops": 0}
+            _ = bootstrap.find_successor(new_node.node_id, hops=hops)
+            new_node.join(bootstrap)
+            nodes.append(new_node)
+
+            stabilize_network(nodes, rounds=10)
+            hops_list.append(hops["hops"])
+
+        t1 = time.time()
+        return stats(hops_list), (t1 - t0)
+
+
+    def eval_leave(nodes: List[ChordNode], n_ops: int) -> Tuple[Dict[str, float], float]:
+        if len(nodes) <= 1:
+            return {"avg": 0.0, "min": 0.0, "max": 0.0}, 0.0
+
+        n_ops = min(n_ops, len(nodes) - 1)
+        victims = random.sample(nodes, k=n_ops)
+
+        hops_list: List[int] = []
+        t0 = time.time()
+
+        for v in victims:
+            if v.successor == v:
+                continue
+            v.leave()
+            nodes[:] = [n for n in nodes if n is not v]
+            stabilize_network(nodes, rounds=10)
+            hops_list.append(0)  # graceful leave: no routing
+
+        t1 = time.time()
+        return stats(hops_list), (t1 - t0)
+
+
+    # ------------------- Concurrent K popularity lookups -------------------
+
+    def lookup_popularity(nodes: List[ChordNode], title: str) -> Tuple[str, Optional[float], int]:
         entry = random.choice(nodes)
         hops = {"hops": 0}
-        entry.put(key, value, hops=hops)
+        value = entry.get(title, hops=hops)
 
-        hops_list.append(hops["hops"])
-        titles.append(key)
+        if value is None:
+            return (title, None, hops["hops"])
 
-    t1 = time.time()
-    return stats(hops_list), (t1 - t0), titles
+        pop = value.get("popularity", None)
+        try:
+            pop = float(pop) if pop is not None else None
+        except Exception:
+            pop = None
 
-
-def eval_lookup(nodes: List[ChordNode], titles: List[str], n_ops: int) -> Tuple[Dict[str, float], float]:
-    if not titles:
-        return {"avg": 0.0, "min": 0.0, "max": 0.0}, 0.0
-
-    hops_list: List[int] = []
-    t0 = time.time()
-
-    for _ in range(n_ops):
-        key = random.choice(titles)
-        entry = random.choice(nodes)
-
-        hops = {"hops": 0}
-        _ = entry.get(key, hops=hops)
-        hops_list.append(hops["hops"])
-
-    t1 = time.time()
-    return stats(hops_list), (t1 - t0)
+        return (title, pop, hops["hops"])
 
 
-def eval_delete(nodes: List[ChordNode], titles: List[str], n_ops: int) -> Tuple[Dict[str, float], float]:
-    if not titles:
-        return {"avg": 0.0, "min": 0.0, "max": 0.0}, 0.0
+    def concurrent_popularity_lookup(
+        nodes: List[ChordNode],
+        titles: List[str],
+        K: int = 10,
+        max_workers: Optional[int] = None
+    ) -> Tuple[List[Tuple[str, Optional[float]]], Dict[str, float]]:
 
-    n_ops = min(n_ops, len(titles))
-    keys_to_delete = random.sample(titles, k=n_ops)
+        if not titles:
+            return [], {"avg": 0.0, "min": 0.0, "max": 0.0}
 
-    hops_list: List[int] = []
-    t0 = time.time()
+        K = max(1, min(K, len(titles)))
+        chosen = titles[:K]
+        max_workers = max_workers or K
 
-    for key in keys_to_delete:
-        entry = random.choice(nodes)
-        hops = {"hops": 0}
-        _ = entry.delete_key(key, hops=hops)
-        hops_list.append(hops["hops"])
+        hop_list: List[int] = []
+        out: List[Tuple[str, Optional[float]]] = []
 
-    t1 = time.time()
-    return stats(hops_list), (t1 - t0)
+        with ThreadPoolExecutor(max_workers=max_workers) as ex:
+            futures = [ex.submit(lookup_popularity, nodes, t) for t in chosen]
+            for f in as_completed(futures):
+                title, pop, hops = f.result()
+                out.append((title, pop))
+                hop_list.append(hops)
 
-
-def eval_join(nodes: List[ChordNode], m: int, n_ops: int) -> Tuple[Dict[str, float], float]:
-    hops_list: List[int] = []
-    t0 = time.time()
-
-    for i in range(n_ops):
-        new_node = ChordNode(f"node-new-{int(time.time() * 1000) % 10_000}_{i}", m)
-        bootstrap = random.choice(nodes)
-
-        hops = {"hops": 0}
-        _ = bootstrap.find_successor(new_node.node_id, hops=hops)
-        new_node.join(bootstrap)
-        nodes.append(new_node)
-
-        stabilize_network(nodes, rounds=10)
-        hops_list.append(hops["hops"])
-
-    t1 = time.time()
-    return stats(hops_list), (t1 - t0)
+        out.sort(key=lambda x: chosen.index(x[0]) if x[0] in chosen else 10**9)
+        return out, stats(hop_list)
 
 
-def eval_leave(nodes: List[ChordNode], n_ops: int) -> Tuple[Dict[str, float], float]:
-    if len(nodes) <= 1:
-        return {"avg": 0.0, "min": 0.0, "max": 0.0}, 0.0
+    # ============================================================
+    #                         MAIN
+    # ============================================================
+    if CSV_FILE.exists():
+        print(f"Reading CSV: {CSV_FILE}...")
+        df_raw = pd.read_csv(CSV_FILE, encoding="latin1")
 
-    n_ops = min(n_ops, len(nodes) - 1)
-    victims = random.sample(nodes, k=n_ops)
+        cols_present = [c for c in MOVIE_COLS_14 if c in df_raw.columns]
+        if "title" not in cols_present:
+            raise SystemExit("CSV must contain 'title' column.")
 
-    hops_list: List[int] = []
-    t0 = time.time()
+        df = df_raw[cols_present].dropna(subset=["title"]).copy().reset_index(drop=True)
+        print(f"Loaded {len(df)} rows. Columns used: {cols_present}")
 
-    for v in victims:
-        if v.successor == v:
-            continue
-        v.leave()
-        nodes[:] = [n for n in nodes if n is not v]
-        stabilize_network(nodes, rounds=10)
-        hops_list.append(0)  # graceful leave: no routing
+        # --- experiment parameters ---
+        m = 16
+        num_nodes = 50
 
-    t1 = time.time()
-    return stats(hops_list), (t1 - t0)
+        insert_ops = 5000
+        lookup_ops = 5000
+        delete_ops = 2000
+        join_ops = 20
+        leave_ops = 20
 
+        print("\nBuilding Chord network...")
+        nodes = create_network(num_nodes=num_nodes, m=m)
 
-# ------------------- Concurrent K popularity lookups -------------------
+        print("\n=== EVALUATION (Chord) ===")
 
-def lookup_popularity(nodes: List[ChordNode], title: str) -> Tuple[str, Optional[float], int]:
-    entry = random.choice(nodes)
-    hops = {"hops": 0}
-    value = entry.get(title, hops=hops)
+        ins_stats, ins_time, inserted_titles = eval_insert(nodes, df, n_ops=insert_ops)
+        print(f"INSERT: {ins_stats} | time={ins_time:.3f}s")
 
-    if value is None:
-        return (title, None, hops["hops"])
+        # ---------- CONCURRENT LOOKUP (K titles) ----------
+        print("\n--- Concurrent Popularity Lookup (K titles) ---")
+        try:
+            K = int(input("Δώσε K (π.χ. 10): ").strip())
+        except Exception:
+            K = 10
 
-    pop = value.get("popularity", None)
-    try:
-        pop = float(pop) if pop is not None else None
-    except Exception:
-        pop = None
+        if inserted_titles:
+            chosen_titles = random.sample(inserted_titles, k=min(K, len(inserted_titles)))
+            results, hop_stats = concurrent_popularity_lookup(nodes, chosen_titles, K=len(chosen_titles))
 
-    return (title, pop, hops["hops"])
+            print("\nΑποτελέσματα (title -> popularity):")
+            for t, p in results:
+                print(f"- {t} -> {p}")
 
+            print(f"\nRouting hops για τα {len(chosen_titles)} concurrent lookups:")
+            print(hop_stats)
+        else:
+            print("Δεν υπάρχουν inserted titles για concurrent lookup.")
 
-def concurrent_popularity_lookup(
-    nodes: List[ChordNode],
-    titles: List[str],
-    K: int = 10,
-    max_workers: Optional[int] = None
-) -> Tuple[List[Tuple[str, Optional[float]]], Dict[str, float]]:
+        # continue with the remaining operations normally
+        look_stats, look_time = eval_lookup(nodes, inserted_titles, n_ops=lookup_ops)
+        print(f"LOOKUP: {look_stats} | time={look_time:.3f}s")
 
-    if not titles:
-        return [], {"avg": 0.0, "min": 0.0, "max": 0.0}
+        del_stats, del_time = eval_delete(nodes, inserted_titles, n_ops=delete_ops)
+        print(f"DELETE: {del_stats} | time={del_time:.3f}s")
 
-    K = max(1, min(K, len(titles)))
-    chosen = titles[:K]
-    max_workers = max_workers or K
+        join_stats, join_time = eval_join(nodes, m=m, n_ops=join_ops)
+        print(f"JOIN  : {join_stats} | time={join_time:.3f}s")
 
-    hop_list: List[int] = []
-    out: List[Tuple[str, Optional[float]]] = []
+        leave_stats, leave_time = eval_leave(nodes, n_ops=leave_ops)
+        print(f"LEAVE : {leave_stats} | time={leave_time:.3f}s  (routing hops=0 in graceful leave)")
 
-    with ThreadPoolExecutor(max_workers=max_workers) as ex:
-        futures = [ex.submit(lookup_popularity, nodes, t) for t in chosen]
-        for f in as_completed(futures):
-            title, pop, hops = f.result()
-            out.append((title, pop))
-            hop_list.append(hops)
-
-    out.sort(key=lambda x: chosen.index(x[0]) if x[0] in chosen else 10**9)
-    return out, stats(hop_list)
-
-
-# ============================================================
-#                         MAIN
-# ============================================================
-if CSV_FILE.exists():
-    print(f"Reading CSV: {CSV_FILE}...")
-    df_raw = pd.read_csv(CSV_FILE, encoding="latin1")
-
-    cols_present = [c for c in MOVIE_COLS_14 if c in df_raw.columns]
-    if "title" not in cols_present:
-        raise SystemExit("CSV must contain 'title' column.")
-
-    df = df_raw[cols_present].dropna(subset=["title"]).copy().reset_index(drop=True)
-    print(f"Loaded {len(df)} rows. Columns used: {cols_present}")
-
-    # --- experiment parameters ---
-    m = 16
-    num_nodes = 50
-
-    insert_ops = 5000
-    lookup_ops = 5000
-    delete_ops = 2000
-    join_ops = 20
-    leave_ops = 20
-
-    print("\nBuilding Chord network...")
-    nodes = create_network(num_nodes=num_nodes, m=m)
-
-    print("\n=== EVALUATION (Chord) ===")
-
-    ins_stats, ins_time, inserted_titles = eval_insert(nodes, df, n_ops=insert_ops)
-    print(f"INSERT: {ins_stats} | time={ins_time:.3f}s")
-
-    # ---------- CONCURRENT LOOKUP (K titles) ----------
-    print("\n--- Concurrent Popularity Lookup (K titles) ---")
-    try:
-        K = int(input("Δώσε K (π.χ. 10): ").strip())
-    except Exception:
-        K = 10
-
-    if inserted_titles:
-        chosen_titles = random.sample(inserted_titles, k=min(K, len(inserted_titles)))
-        results, hop_stats = concurrent_popularity_lookup(nodes, chosen_titles, K=len(chosen_titles))
-
-        print("\nΑποτελέσματα (title -> popularity):")
-        for t, p in results:
-            print(f"- {t} -> {p}")
-
-        print(f"\nRouting hops για τα {len(chosen_titles)} concurrent lookups:")
-        print(hop_stats)
     else:
-        print("Δεν υπάρχουν inserted titles για concurrent lookup.")
-
-    # continue with the remaining operations normally
-    look_stats, look_time = eval_lookup(nodes, inserted_titles, n_ops=lookup_ops)
-    print(f"LOOKUP: {look_stats} | time={look_time:.3f}s")
-
-    del_stats, del_time = eval_delete(nodes, inserted_titles, n_ops=delete_ops)
-    print(f"DELETE: {del_stats} | time={del_time:.3f}s")
-
-    join_stats, join_time = eval_join(nodes, m=m, n_ops=join_ops)
-    print(f"JOIN  : {join_stats} | time={join_time:.3f}s")
-
-    leave_stats, leave_time = eval_leave(nodes, n_ops=leave_ops)
-    print(f"LEAVE : {leave_stats} | time={leave_time:.3f}s  (routing hops=0 in graceful leave)")
-
-else:
-    print(f"CSV not found: {CSV_FILE}")
+        print(f"CSV not found: {CSV_FILE}")
