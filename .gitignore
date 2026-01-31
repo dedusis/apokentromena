@@ -1,1 +1,9 @@
-data/data_movies_clean.xslx
+data/
+*.xlsx
+*.csv
+
+
+.DS_Store
+
+C:/
+C:/**
