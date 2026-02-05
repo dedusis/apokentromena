@@ -54,6 +54,10 @@ class ChordAdapter(DHTInterface):
         self.last_hops = hops["hops"]
         return value
 
+    def update(self, key, value):
+        self.delete(key)
+        self.insert(key, value)
+
     def delete(self, key):
         start_node = self._get_random_node()
         hops = {"hops": 0}

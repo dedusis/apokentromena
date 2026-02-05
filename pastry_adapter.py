@@ -34,6 +34,10 @@ class PastryAdapter(DHTInterface):
                 return value[-1] 
             return value
 
+    def update(self, key, value):
+        self.delete(key)
+        self.insert(key, value)
+
     def delete(self, key):
             start_node = self._get_random_node()
             _, _, hops = start_node.delete(key)
