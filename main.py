@@ -20,7 +20,7 @@ from concurrency import run_concurrent
 
 def main():
     print("Loading Dataset...")
-    df = pd.read_excel("data/data_movies_clean.csv")
+    df = pd.read_csv("data_movies_clean.csv")
     df = df.dropna(subset=['title'])
     
     choice = input("Choose DHT (chord / pastry): ").strip().lower()

@@ -10,3 +10,6 @@ C:/**
 
 data/*.csv
 *.csv
+
+.idea/
+__pycache__/
