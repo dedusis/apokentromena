@@ -7,3 +7,6 @@ data/
 
 C:/
 C:/**
+
+data/*.csv
+*.csv
