@@ -174,3 +174,101 @@ Zip/Rar
 (καλό να έχεις και README)
 
 Deadline: 1-2η εβδομάδα Φεβρουαρίου
+========================================================================================================================================================================================================================================================================================================================================================================================================================================
+
+Εκτέλεση Project:
+
+Πώς τρέχει το project;
+Τρέχεις την main του branch zogo και επιλέγεις:
+1️⃣ CHORD:
+Loading Dataset...
+Choose DHT (chord / pastry): chord
+Building chord network with 100 nodes...
+Chord Network built with 100 nodes (m=16).
+INSERT | avg hops=4.000 | time=0.003s
+LOOKUP | avg hops=4.000 | time=0.000s
+
+=== Concurrent Popularity Lookup ===
+01. Ultimate G's: Zac's Flying Dream                             | popularity: 4.4791
+02. How Proust Can Change Your Life                              | popularity: 3.7264
+03. Jimmy Neutron: Operation: Rescue Jet Fusion                  | popularity: 5.2546
+04. Pass The Mic!                                                | popularity: 3.4843
+05. Harvesting Horror: Children of the Corn                      | popularity: 4.092
+06. Barbecue: A Texas Love Story                                 | popularity: 4.0708
+07. The Making of 'Heat'                                         | popularity: 3.0967
+08. Proteus: A Nineteenth Century Vision                         | popularity: 3.2603
+09. Ice Cube: The Making of a Don                                | popularity: 3.7178
+10. Aberfan: The Untold Story                                    | popularity: 3.1212
+11. The Damned Thing                                             | popularity: 3.8826
+12. A Very Fairy Christmas                                       | popularity: 3.1437
+13. Spider's Web: A Pig's Tale                                   | popularity: 3.0996
+14. Zygon                                                        | popularity: 5.9232
+15. Darwin's Struggle: The Evolution of the Origin of Species    | popularity: 3.3112
+16. Maya Deren's Sink                                            | popularity: 4.0014
+17. Pulse                                                        | popularity: 3.2874
+18. Dive, Dive, Dive! with Robert Llewellyn                      | popularity: 3.5646
+19. Quiet                                                        | popularity: 3.7397
+20. The Evil Dead Inbred Rednecks                                | popularity: 3.0755
+21. Reboot                                                       | popularity: 4.0698
+22. Mel Smith: I've Done Some Things                             | popularity: 3.7676
+23. River Deep, Mountain High: James Nesbitt in New Zealand      | popularity: 3.5209
+24. The 10 Faces of Michael Jackson                              | popularity: 3.035
+25. Bring Me the Head of Tim Horton                              | popularity: 3.8122
+26. The Keys of Christmas                                        | popularity: 3.0808
+27. Rodney King                                                  | popularity: 4.6035
+28. The Private War of Joseph Sargent                            | popularity: 4.4762
+29. Russia 1917: Countdown to Revolution                         | popularity: 3.1116
+30. On the Line: The Race of Champions                           | popularity: 4.5074
+DELETE | avg hops=3.871 | time=0.000s
+JOIN   | avg hops=4.516 | time=0.006s
+LEAVE  | avg hops=2.742 | time=0.006s
+
+Process finished with exit code 0
+
+2️⃣ PASTRY:
+Loading Dataset...
+Choose DHT (chord / pastry): pastry
+Building pastry network with 100 nodes...
+Pastry Network built with 100 nodes.
+INSERT | avg hops=1.484 | time=0.002s
+LOOKUP | avg hops=1.613 | time=0.000s
+
+=== Concurrent Popularity Lookup ===
+01. Ultimate G's: Zac's Flying Dream                             | popularity: 4.4791
+02. How Proust Can Change Your Life                              | popularity: 3.7264
+03. Jimmy Neutron: Operation: Rescue Jet Fusion                  | popularity: 5.2546
+04. Pass The Mic!                                                | popularity: 3.4843
+05. Harvesting Horror: Children of the Corn                      | popularity: 4.092
+06. Barbecue: A Texas Love Story                                 | popularity: 4.0708
+07. The Making of 'Heat'                                         | popularity: 3.0967
+08. Proteus: A Nineteenth Century Vision                         | popularity: 3.2603
+09. Ice Cube: The Making of a Don                                | popularity: 3.7178
+10. Aberfan: The Untold Story                                    | popularity: 3.1212
+11. The Damned Thing                                             | popularity: 3.8826
+12. A Very Fairy Christmas                                       | popularity: 3.1437
+13. Spider's Web: A Pig's Tale                                   | popularity: 3.0996
+14. Zygon                                                        | popularity: 5.9232
+15. Darwin's Struggle: The Evolution of the Origin of Species    | popularity: 3.3112
+16. Maya Deren's Sink                                            | popularity: 4.0014
+17. Pulse                                                        | popularity: 3.2874
+18. Dive, Dive, Dive! with Robert Llewellyn                      | popularity: 3.5646
+19. Quiet                                                        | popularity: 3.7397
+20. The Evil Dead Inbred Rednecks                                | popularity: 3.0755
+21. Reboot                                                       | popularity: 4.0698
+22. Mel Smith: I've Done Some Things                             | popularity: 3.7676
+23. River Deep, Mountain High: James Nesbitt in New Zealand      | popularity: 3.5209
+24. The 10 Faces of Michael Jackson                              | popularity: 3.035
+25. Bring Me the Head of Tim Horton                              | popularity: 3.8122
+26. The Keys of Christmas                                        | popularity: 3.0808
+27. Rodney King                                                  | popularity: 4.6035
+28. The Private War of Joseph Sargent                            | popularity: 4.4762
+29. Russia 1917: Countdown to Revolution                         | NOT FOUND | repr='Russia 1917: Countdown to Revolution'
+30. On the Line: The Race of Champions                           | popularity: 4.5074
+DELETE | avg hops=1.613 | time=0.001s
+JOIN   | avg hops=1.548 | time=0.105s
+LEAVE  | avg hops=1.548 | time=0.107s
+
+Process finished with exit code 0
+
+▶️ Άνοιξε terminal και γράψε την εξής εντολή για να δεις το plot chrod vs pastry diagram
+    python plots/plot_hops.py
