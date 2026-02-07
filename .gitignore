@@ -1,0 +1,15 @@
+data/
+*.xlsx
+*.csv
+
+
+.DS_Store
+
+C:/
+C:/**
+
+data/*.csv
+*.csv
+
+.idea/
+__pycache__/

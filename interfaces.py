@@ -15,6 +15,10 @@ class DHTInterface(ABC):
         pass
 
     @abstractmethod
+    def update(self, key, value):
+        pass
+
+    @abstractmethod
     def delete(self, key):
         pass
 
