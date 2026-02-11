@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 # Operations
 operations = ["Insert", "Lookup", "Delete", "Join", "Leave"]
 
-# Avg hops (από τα experiments σου)
+# Avg hops 
 chord_hops = [4.323, 3.968, 3.677, 3.935, 3.032]
 pastry_hops = [1.516, 1.548, 1.581, 1.516, 1.548]
 
