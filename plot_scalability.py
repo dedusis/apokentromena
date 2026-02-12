@@ -5,7 +5,7 @@ from pastry_adapter import PastryAdapter
 from experiments import run_experiment_insert, run_experiment_lookup
 
 # Load dataset
-df = pd.read_excel("data/data_movies_clean.csv")
+df = pd.read_csv("data_movies_clean.csv")
 df = df.dropna(subset=["title"])
 
 node_sizes = [50, 100, 200]
