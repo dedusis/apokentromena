@@ -159,10 +159,10 @@ class ChordNode:
 
 # Dataset / Network utils
 if __name__ == "__main__" :
-    ROOT = Path("data/data_movies_clean.xlsx")
+    ROOT = Path("data/data_movies_clean.csv")
     DATA_DIR = ROOT / "data"
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    CSV_FILE = DATA_DIR / "data_movies_clean.xlsx"
+    CSV_FILE = DATA_DIR / "data_movies_clean.csv"
 
     MOVIE_COLS_14 = [
         "id", "title", "adult", "original_language", "origin_country", "release_date",
@@ -357,7 +357,7 @@ if __name__ == "__main__" :
         out.sort(key=lambda x: chosen.index(x[0]) if x[0] in chosen else 10**9)
         return out, stats(hop_list)
 
-
+    # MAIN
     
     if CSV_FILE.exists():
         print(f"Reading CSV: {CSV_FILE}...")
@@ -423,4 +423,5 @@ if __name__ == "__main__" :
 
     else:
         print(f"CSV not found: {CSV_FILE}")
+
 
