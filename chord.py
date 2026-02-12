@@ -59,7 +59,7 @@ class ChordNode:
     def __repr__(self) -> str:
         return f"ChordNode(name={self.name!r}, id={self.node_id})"
 
-    # ---------- Routing core ----------
+    #Routing core
     def closest_preceding_finger(self, target_id: int) -> "ChordNode":
         for i in range(self.m - 1, -1, -1):
             fn = self.finger[i].node
@@ -85,7 +85,7 @@ class ChordNode:
 
         return next_node.find_successor(target_id, hops=hops)
 
-    # ---------- Join / maintenance ----------
+    #Join / maintenance
     def join(self, bootstrap: Optional["ChordNode"]) -> None:
         if bootstrap is None:
             self.predecessor = None
@@ -118,7 +118,7 @@ class ChordNode:
         self.finger[i].node = self.find_successor(start)
         self._next_finger = (self._next_finger + 1) % self.m
 
-    # ---------- DHT operations ----------
+    # DHT operations
     def put(self, key: str, value: Any, hops: Optional[Dict[str, int]] = None) -> int:
         key_id = hash_m(key, self.m)
         owner = self.find_successor(key_id, hops)
@@ -157,7 +157,7 @@ class ChordNode:
         self.predecessor = None
 
 
-# ------------------- Dataset / Network utils -------------------
+# Dataset / Network utils
 if __name__ == "__main__" :
     ROOT = Path("data/data_movies_clean.xlsx")
     DATA_DIR = ROOT / "data"
@@ -205,7 +205,7 @@ if __name__ == "__main__" :
         return {"avg": sum(hops) / len(hops), "min": float(min(hops)), "max": float(max(hops))}
 
 
-    # ------------------- Operation evaluations -------------------
+    # Operation evaluations
 
     def eval_insert(nodes: List[ChordNode], df: pd.DataFrame, n_ops: int) -> Tuple[Dict[str, float], float, List[str]]:
         n_ops = min(n_ops, len(df))
@@ -311,7 +311,7 @@ if __name__ == "__main__" :
         return stats(hops_list), (t1 - t0)
 
 
-    # ------------------- Concurrent K popularity lookups -------------------
+    # Concurrent K popularity lookups
 
     def lookup_popularity(nodes: List[ChordNode], title: str) -> Tuple[str, Optional[float], int]:
         entry = random.choice(nodes)
@@ -358,9 +358,7 @@ if __name__ == "__main__" :
         return out, stats(hop_list)
 
 
-    # ============================================================
-    #                         MAIN
-    # ============================================================
+    
     if CSV_FILE.exists():
         print(f"Reading CSV: {CSV_FILE}...")
         df_raw = pd.read_csv(CSV_FILE, encoding="latin1")
@@ -372,7 +370,7 @@ if __name__ == "__main__" :
         df = df_raw[cols_present].dropna(subset=["title"]).copy().reset_index(drop=True)
         print(f"Loaded {len(df)} rows. Columns used: {cols_present}")
 
-        # --- experiment parameters ---
+        #  experiment parameters 
         m = 16
         num_nodes = 50
 
@@ -390,7 +388,7 @@ if __name__ == "__main__" :
         ins_stats, ins_time, inserted_titles = eval_insert(nodes, df, n_ops=insert_ops)
         print(f"INSERT: {ins_stats} | time={ins_time:.3f}s")
 
-        # ---------- CONCURRENT LOOKUP (K titles) ----------
+        # CONCURRENT LOOKUP (K titles)
         print("\n--- Concurrent Popularity Lookup (K titles) ---")
         try:
             K = int(input("Δώσε K (π.χ. 10): ").strip())
@@ -425,3 +423,4 @@ if __name__ == "__main__" :
 
     else:
         print(f"CSV not found: {CSV_FILE}")
+
