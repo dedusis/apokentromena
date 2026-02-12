@@ -158,9 +158,9 @@ class ChordNode:
 
 
 # Dataset / Network utils
-if __name__ == "__main__" :
-    ROOT = Path("data/data_movies_clean.csv")
-    DATA_DIR = ROOT / "data"
+if __name__ == "__main__":
+
+    DATA_DIR = Path("data")
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     CSV_FILE = DATA_DIR / "data_movies_clean.csv"
 
@@ -423,5 +423,6 @@ if __name__ == "__main__" :
 
     else:
         print(f"CSV not found: {CSV_FILE}")
+
 
 
